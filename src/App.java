@@ -4,6 +4,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
 import br.dao.UserDAO;
+import br.excepetion.CustomException;
 import br.excepetion.EmptyStorageException;
 import br.excepetion.UserNotFoundExcepetion;
 import br.excepetion.ValidatorException;
@@ -34,7 +35,7 @@ public class App {
                     try{
                         var user = dao.save(requestToSave());
                         System.out.printf("usuario salvo %s", user);
-                    }catch (ValidatorException ex) {
+                    }catch (CustomException ex) {
                         System.out.println(ex.getMessage());
                         ex.printStackTrace();
 
@@ -47,7 +48,7 @@ public class App {
                     }catch (UserNotFoundExcepetion | EmptyStorageException ex) {
                         System.out.println(ex.getMessage());
 
-                    }catch(ValidatorException ex){
+                    }catch(CustomException ex){
                         System.out.println(ex.getMessage());
                         ex.printStackTrace();
                     } 
@@ -92,7 +93,7 @@ public class App {
         return scanner.nextLong();
     }
 
-    private static UserModel requestToSave() throws ValidatorException{
+    private static UserModel requestToSave() {
         System.out.println("Informe o nome: ");
         var name = scanner.next();
         System.out.println("Informe o email: ");
@@ -107,15 +108,19 @@ public class App {
     }
 
     private static UserModel validatorInputs(final long id, final String name, 
-    final String email, final LocalDate birthday) throws ValidatorException  {
-            
+    final String email, final LocalDate birthday)   {
         var user = new UserModel(id, name, email, birthday);
+        try{  
         UserValidator.verifyModel(user);
         return user;
+        }catch (ValidatorException ex){
+            throw new CustomException("the your user contain errors");
+            
+        }
         
     }
 
-    private static UserModel requestToUpdate()throws ValidatorException{
+    private static UserModel requestToUpdate(){
         System.out.println("Informe o identificador: ");
         var id = scanner.nextLong();
         System.out.println("Informe o nome: ");
